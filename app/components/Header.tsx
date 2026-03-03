@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface NavItem {
@@ -21,8 +20,8 @@ const NAV_ITEMS: NavItem[] = [
 // ── Logo ──────────────────────────────────────────────────────────────────────
 function TechloLogo() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 group no-underline ">
-      {/* <div className="relative w-9 h-9 rounded-lg bg-[#0a0a14] border border-[#00f5e033] flex items-center justify-center overflow-hidden group-hover:border-[#00f5e066] transition-colors duration-300">
+    <Link href="/" className="flex items-center gap-2.5 group no-underline">
+      <div className="relative w-9 h-9 rounded-lg bg-[#0a0a14] border border-[#00f5e033] flex items-center justify-center overflow-hidden group-hover:border-[#00f5e066] transition-colors duration-300">
         <svg width="22" height="28" viewBox="0 0 22 28" fill="none">
           <rect
             x="3" y="1" width="16" height="26" rx="3"
@@ -50,8 +49,7 @@ function TechloLogo() {
         style={{ textShadow: "0 0 12px #00f5e044, 0 0 24px #00f5e022" }}
       >
         Techlo
-      </span> */}
-      <Image src='/icons/logo.png' alt='Techlo Logo' width={152} height={152} className='' />
+      </span>
     </Link>
   );
 }
@@ -177,7 +175,7 @@ export default function TechloHeader() {
   };
 
   return (
-    <>
+    <div ref={panelRef}>
       <style>{`
         @keyframes techlo-scan {
           0%   { transform: translateX(-200%); }
@@ -188,7 +186,7 @@ export default function TechloHeader() {
       {/* ── Sticky Header Bar ── */}
       <header
         className={[
-          "sticky top-0 z-50 w-full overflow-hidden transition-all duration-300 max-w-[1000px] mx-auto rounded-b-xl py-5",
+          "sticky top-0 z-50 w-full overflow-hidden transition-all duration-300",
           scrolled
             ? "bg-[#080810]/95 backdrop-blur-xl border-b border-[#00f5e033] shadow-[0_2px_32px_#00f5e011]"
             : "bg-[#080810]/70 backdrop-blur-md border-b border-transparent",
@@ -208,7 +206,6 @@ export default function TechloHeader() {
 
           {/* Hamburger — always visible */}
           <button
-            ref={panelRef as React.RefObject<HTMLButtonElement>}
             onClick={() => setMenuOpen((prev) => !prev)}
             aria-label={menuOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={menuOpen}
@@ -283,7 +280,6 @@ export default function TechloHeader() {
           (hidden on mobile, visible on md+)
       ════════════════════════════════════════════════ */}
       <div
-        ref={panelRef}
         id="techlo-nav-panel-desktop"
         role="navigation"
         aria-label="Main navigation"
@@ -369,6 +365,6 @@ export default function TechloHeader() {
           100% { transform: translateY(350%); }
         }
       `}</style>
-    </>
+    </div>
   );
 }
