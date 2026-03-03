@@ -61,7 +61,7 @@ const PRODUCTS: Product[] = [
   {
     id: "p7", name: "iPad Air 5th Gen", category: "Tablets",
     price: 2100, originalPrice: 3400, condition: "Like New",
-    image: "/icons/iphone.jpg",
+    image: "/icons/ipad.jpg",
     specs: ["64GB", "Wi-Fi", "Starlight"], inStock: 4,
   },
   {
@@ -78,6 +78,8 @@ const CONDITION_COLORS: Record<Product["condition"], string> = {
   "Fair":     "text-[#f59e0b] border-[#f59e0b33]",
 };
 
+const DELIVERY_FEE = 30;
+
 const fmt = (n: number) =>
   new Intl.NumberFormat("en-GH", { style: "currency", currency: "GHS", maximumFractionDigits: 0 }).format(n);
 
@@ -92,6 +94,165 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
       style={{ boxShadow: "0 0 32px #00f5e022" }}
     >
       ✓ &nbsp;{message}
+    </div>
+  );
+}
+
+// ── Basket Modal ──────────────────────────────────────────────────────────────
+function BasketModal({
+  cart, onUpdateQty, onRemove, onClose, onCheckout,
+}: {
+  cart: CartItem[];
+  onUpdateQty: (id: string, delta: number) => void;
+  onRemove: (id: string) => void;
+  onClose: () => void;
+  onCheckout: () => void;
+}) {
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const total    = subtotal + DELIVERY_FEE;
+  const totalItems = cart.reduce((a, i) => a + i.qty, 0);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-[#080810]/85 backdrop-blur-md" />
+
+      <div
+        className="relative z-10 w-full max-w-lg max-h-[90vh] flex flex-col
+          bg-[#0d0d1f] border border-[#00f5e033] rounded-2xl overflow-hidden"
+        style={{ boxShadow: "0 0 80px #00f5e011, 0 32px 64px #00000099" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#00f5e01a] flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#00f5e011] border border-[#00f5e033] flex items-center justify-center flex-shrink-0">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M2 3h1.5l2 8h7l2-6H5.5" stroke="#00f5e0" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="7.5" cy="14" r="1" fill="#00f5e0"/>
+                <circle cx="12" cy="14" r="1" fill="#00f5e0"/>
+              </svg>
+            </div>
+            <div>
+              <h2 className="font-mono font-bold text-white text-base tracking-wide">Your Basket</h2>
+              <p className="font-mono text-[10px] text-[#00f5e055] tracking-widest uppercase">
+                {totalItems} item{totalItems !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-[#080810] border border-[#00f5e022]
+              text-[#00f5e0] hover:bg-[#00f5e011] transition-all duration-200 font-mono text-base"
+          >✕</button>
+        </div>
+
+        {/* ── Items list ── */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-3">
+          {cart.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center gap-3 p-3 rounded-xl bg-[#080810] border border-[#00f5e01a]
+                hover:border-[#00f5e033] transition-colors duration-200"
+            >
+              {/* Thumbnail */}
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-[#00f5e022]">
+                <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#00f5e055] mb-0.5">{item.category}</p>
+                <p className="font-mono font-bold text-[13px] text-white truncate">{item.name}</p>
+                <p className="font-mono text-[11px] text-[#00f5e0] mt-0.5">
+                  {fmt(item.price)} × {item.qty}{" "}
+                  <span className="text-[#ffffff44]">=</span>{" "}
+                  <span className="text-white font-bold">{fmt(item.price * item.qty)}</span>
+                </p>
+              </div>
+
+              {/* Qty + Remove */}
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <div className="flex items-center border border-[#00f5e033] rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => onUpdateQty(item.id, -1)}
+                    disabled={item.qty <= 1}
+                    className="w-7 h-7 flex items-center justify-center font-mono text-sm text-[#00f5e0]
+                      hover:bg-[#00f5e011] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150"
+                  >−</button>
+                  <span className="w-7 text-center font-mono text-xs text-white tabular-nums">{item.qty}</span>
+                  <button
+                    onClick={() => onUpdateQty(item.id, 1)}
+                    disabled={item.qty >= item.inStock}
+                    className="w-7 h-7 flex items-center justify-center font-mono text-sm text-[#00f5e0]
+                      hover:bg-[#00f5e011] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150"
+                  >+</button>
+                </div>
+                <button
+                  onClick={() => onRemove(item.id)}
+                  className="font-mono text-[10px] tracking-widest uppercase text-[#ffffff33]
+                    hover:text-[#f87171] transition-colors duration-200"
+                >Remove</button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Order summary ── */}
+        <div className="flex-shrink-0 border-t border-[#00f5e01a] px-6 pt-4 pb-6 bg-[#080810]/60">
+          <div className="flex flex-col gap-2.5 mb-5">
+            {/* Subtotal */}
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[12px] text-[#7baaa8] tracking-widest uppercase">Subtotal</span>
+              <span className="font-mono text-[13px] text-white">{fmt(subtotal)}</span>
+            </div>
+
+            {/* Delivery */}
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[12px] text-[#7baaa8] tracking-widest uppercase flex items-center gap-2">
+                Delivery
+                <span className="px-1.5 py-0.5 rounded bg-[#00f5e011] border border-[#00f5e022] text-[#00f5e066] text-[9px] tracking-widest">
+                  FLAT RATE
+                </span>
+              </span>
+              <span className="font-mono text-[13px] text-white">{fmt(DELIVERY_FEE)}</span>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-[#00f5e022] to-transparent" />
+
+            {/* Total */}
+            <div className="flex items-center justify-between">
+              <span className="font-mono font-bold text-[13px] text-white tracking-widest uppercase">Total</span>
+              <span
+                className="font-mono font-bold text-2xl text-[#00f5e0]"
+                style={{ textShadow: "0 0 16px #00f5e044" }}
+              >{fmt(total)}</span>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 h-11 rounded-xl border border-[#00f5e033] text-[#7baaa8]
+                font-mono text-[11px] tracking-widest uppercase
+                hover:border-[#00f5e055] hover:text-[#00f5e0] transition-all duration-200"
+            >Continue</button>
+            <button
+              onClick={onCheckout}
+              className="flex-1 h-11 rounded-xl bg-[#00f5e0] text-[#080810]
+                font-mono font-bold text-[12px] tracking-widest uppercase
+                hover:bg-[#00ddc9] active:scale-95 transition-all duration-200"
+              style={{ boxShadow: "0 0 20px #00f5e033" }}
+            >Checkout</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -247,15 +408,14 @@ function ProductCard({ product, onOpenModal, onAddToCart }: {
 
 // ── Main Section ──────────────────────────────────────────────────────────────
 export default function TechloProductSection() {
-  // ── Read shared search state from context ──
   const { query, activeFilter } = useSearch();
 
   const [cart, setCart]                 = useState<CartItem[]>([]);
   const [modalProduct, setModalProduct] = useState<Product | null>(null);
   const [modalQty, setModalQty]         = useState(1);
+  const [basketOpen, setBasketOpen]     = useState(false);
   const [toast, setToast]               = useState({ message: "", visible: false });
 
-  // ── Filtering logic: apply both text query and category filter ──
   const filtered = PRODUCTS.filter((p) => {
     const matchesCategory =
       activeFilter === "all" || p.category.toLowerCase() === activeFilter.toLowerCase();
@@ -275,17 +435,41 @@ export default function TechloProductSection() {
   const addToCart = useCallback((product: Product, qty: number) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.id === product.id);
-      if (existing) return prev.map((i) => i.id === product.id ? { ...i, qty: Math.min(product.inStock, i.qty + qty) } : i);
+      if (existing) return prev.map((i) => i.id === product.id
+        ? { ...i, qty: Math.min(product.inStock, i.qty + qty) } : i);
       return [...prev, { ...product, qty }];
     });
     showToast(`${product.name} added to basket`);
   }, [showToast]);
+
+  const updateCartQty = useCallback((id: string, delta: number) => {
+    setCart((prev) =>
+      prev.map((i) => i.id === id
+        ? { ...i, qty: Math.max(1, Math.min(i.inStock, i.qty + delta)) }
+        : i
+      )
+    );
+  }, []);
+
+  const removeFromCart = useCallback((id: string) => {
+    setCart((prev) => {
+      const next = prev.filter((i) => i.id !== id);
+      if (next.length === 0) setBasketOpen(false);
+      return next;
+    });
+  }, []);
 
   const handleBuyNow = useCallback((product: Product, qty: number) => {
     addToCart(product, qty);
     setModalProduct(null);
     showToast("Proceeding to checkout…");
   }, [addToCart, showToast]);
+
+  const handleCheckout = useCallback(() => {
+    setBasketOpen(false);
+    showToast("Proceeding to checkout…");
+    // router.push("/checkout")
+  }, [showToast]);
 
   const openModal = (product: Product) => { setModalProduct(product); setModalQty(1); };
   const cartCount = cart.reduce((acc, i) => acc + i.qty, 0);
@@ -311,7 +495,6 @@ export default function TechloProductSection() {
                 Available{" "}
                 <span className="text-[#00f5e0]" style={{ textShadow: "0 0 16px #00f5e066" }}>Gadgets</span>
               </h2>
-              {/* Live search feedback */}
               {(query.trim() !== "" || activeFilter !== "all") && (
                 <p className="font-mono text-[11px] text-[#00f5e055] mt-1.5 tracking-widest">
                   {filtered.length} result{filtered.length !== 1 ? "s" : ""}
@@ -320,13 +503,29 @@ export default function TechloProductSection() {
                 </p>
               )}
             </div>
+
+            {/* ── Clickable basket button ── */}
             {cartCount > 0 && (
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-[#00f5e033] bg-[#0d0d1f]"
-                style={{ boxShadow: "0 0 20px #00f5e011" }}>
-                <span className="font-mono text-[11px] tracking-widest uppercase text-[#00f5e066]">Basket</span>
-                <span className="w-7 h-7 rounded-full bg-[#00f5e0] text-[#080810] font-mono font-bold text-sm flex items-center justify-center"
-                  style={{ boxShadow: "0 0 12px #00f5e066" }}>{cartCount}</span>
-              </div>
+              <button
+                onClick={() => setBasketOpen(true)}
+                className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-[#00f5e033] bg-[#0d0d1f]
+                  hover:border-[#00f5e066] hover:bg-[#00f5e00a] active:scale-95
+                  transition-all duration-200 group"
+                style={{ boxShadow: "0 0 20px #00f5e011" }}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-[#00f5e0]">
+                  <path d="M2 3h1.5l2 8h7l2-6H5.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="7.5" cy="14" r="1" fill="currentColor"/>
+                  <circle cx="12" cy="14" r="1" fill="currentColor"/>
+                </svg>
+                <span className="font-mono text-[11px] tracking-widest uppercase text-[#00f5e066] group-hover:text-[#00f5e0] transition-colors duration-200">
+                  Basket
+                </span>
+                <span
+                  className="w-7 h-7 rounded-full bg-[#00f5e0] text-[#080810] font-mono font-bold text-sm flex items-center justify-center"
+                  style={{ boxShadow: "0 0 12px #00f5e066" }}
+                >{cartCount}</span>
+              </button>
             )}
           </div>
 
@@ -359,6 +558,7 @@ export default function TechloProductSection() {
         </div>
       </section>
 
+      {/* ── Product Quick-View Modal ── */}
       {modalProduct && (
         <ProductModal
           product={modalProduct} qty={modalQty}
@@ -366,6 +566,17 @@ export default function TechloProductSection() {
           onAddToCart={() => { addToCart(modalProduct, modalQty); setModalProduct(null); }}
           onBuyNow={() => handleBuyNow(modalProduct, modalQty)}
           onClose={() => setModalProduct(null)}
+        />
+      )}
+
+      {/* ── Basket Modal ── */}
+      {basketOpen && cart.length > 0 && (
+        <BasketModal
+          cart={cart}
+          onUpdateQty={updateCartQty}
+          onRemove={removeFromCart}
+          onClose={() => setBasketOpen(false)}
+          onCheckout={handleCheckout}
         />
       )}
 
