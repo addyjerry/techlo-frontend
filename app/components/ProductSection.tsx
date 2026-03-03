@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useSearch } from "@/app/context/SearchContext";
+import { useCart, CartItem } from "@/app/context/CartContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Product {
@@ -17,8 +19,6 @@ interface Product {
   specs: string[];
   inStock: number;
 }
-
-interface CartItem extends Product { qty: number; }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const PRODUCTS: Product[] = [
@@ -108,8 +108,8 @@ function BasketModal({
   onClose: () => void;
   onCheckout: () => void;
 }) {
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const total    = subtotal + DELIVERY_FEE;
+  const subtotal   = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const total      = subtotal + DELIVERY_FEE;
   const totalItems = cart.reduce((a, i) => a + i.qty, 0);
 
   useEffect(() => {
@@ -120,14 +120,13 @@ function BasketModal({
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-[#080810]/85 backdrop-blur-md" />
-
       <div
         className="relative z-10 w-full max-w-lg max-h-[90vh] flex flex-col
           bg-[#0d0d1f] border border-[#00f5e033] rounded-2xl overflow-hidden"
         style={{ boxShadow: "0 0 80px #00f5e011, 0 32px 64px #00000099" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#00f5e01a] flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[#00f5e011] border border-[#00f5e033] flex items-center justify-center flex-shrink-0">
@@ -144,27 +143,19 @@ function BasketModal({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
+          <button onClick={onClose}
             className="w-9 h-9 flex items-center justify-center rounded-lg bg-[#080810] border border-[#00f5e022]
-              text-[#00f5e0] hover:bg-[#00f5e011] transition-all duration-200 font-mono text-base"
-          >✕</button>
+              text-[#00f5e0] hover:bg-[#00f5e011] transition-all duration-200 font-mono text-base">✕</button>
         </div>
 
-        {/* ── Items list ── */}
+        {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-3">
           {cart.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-[#080810] border border-[#00f5e01a]
-                hover:border-[#00f5e033] transition-colors duration-200"
-            >
-              {/* Thumbnail */}
+            <div key={item.id}
+              className="flex items-center gap-3 p-3 rounded-xl bg-[#080810] border border-[#00f5e01a] hover:border-[#00f5e033] transition-colors duration-200">
               <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-[#00f5e022]">
                 <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
               </div>
-
-              {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#00f5e055] mb-0.5">{item.category}</p>
                 <p className="font-mono font-bold text-[13px] text-white truncate">{item.name}</p>
@@ -174,82 +165,58 @@ function BasketModal({
                   <span className="text-white font-bold">{fmt(item.price * item.qty)}</span>
                 </p>
               </div>
-
-              {/* Qty + Remove */}
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 <div className="flex items-center border border-[#00f5e033] rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => onUpdateQty(item.id, -1)}
-                    disabled={item.qty <= 1}
-                    className="w-7 h-7 flex items-center justify-center font-mono text-sm text-[#00f5e0]
-                      hover:bg-[#00f5e011] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150"
-                  >−</button>
+                  <button onClick={() => onUpdateQty(item.id, -1)} disabled={item.qty <= 1}
+                    className="w-7 h-7 flex items-center justify-center font-mono text-sm text-[#00f5e0] hover:bg-[#00f5e011] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150">−</button>
                   <span className="w-7 text-center font-mono text-xs text-white tabular-nums">{item.qty}</span>
-                  <button
-                    onClick={() => onUpdateQty(item.id, 1)}
-                    disabled={item.qty >= item.inStock}
-                    className="w-7 h-7 flex items-center justify-center font-mono text-sm text-[#00f5e0]
-                      hover:bg-[#00f5e011] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150"
-                  >+</button>
+                  <button onClick={() => onUpdateQty(item.id, 1)} disabled={item.qty >= item.inStock}
+                    className="w-7 h-7 flex items-center justify-center font-mono text-sm text-[#00f5e0] hover:bg-[#00f5e011] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150">+</button>
                 </div>
-                <button
-                  onClick={() => onRemove(item.id)}
-                  className="font-mono text-[10px] tracking-widest uppercase text-[#ffffff33]
-                    hover:text-[#f87171] transition-colors duration-200"
-                >Remove</button>
+                <button onClick={() => onRemove(item.id)}
+                  className="font-mono text-[10px] tracking-widest uppercase text-[#ffffff33] hover:text-[#f87171] transition-colors duration-200">
+                  Remove
+                </button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* ── Order summary ── */}
+        {/* Summary */}
         <div className="flex-shrink-0 border-t border-[#00f5e01a] px-6 pt-4 pb-6 bg-[#080810]/60">
           <div className="flex flex-col gap-2.5 mb-5">
-            {/* Subtotal */}
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between">
               <span className="font-mono text-[12px] text-[#7baaa8] tracking-widest uppercase">Subtotal</span>
               <span className="font-mono text-[13px] text-white">{fmt(subtotal)}</span>
             </div>
-
-            {/* Delivery */}
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between items-center">
               <span className="font-mono text-[12px] text-[#7baaa8] tracking-widest uppercase flex items-center gap-2">
                 Delivery
-                <span className="px-1.5 py-0.5 rounded bg-[#00f5e011] border border-[#00f5e022] text-[#00f5e066] text-[9px] tracking-widest">
-                  FLAT RATE
-                </span>
+                <span className="px-1.5 py-0.5 rounded bg-[#00f5e011] border border-[#00f5e022] text-[#00f5e066] text-[9px] tracking-widest">FLAT RATE</span>
               </span>
               <span className="font-mono text-[13px] text-white">{fmt(DELIVERY_FEE)}</span>
             </div>
-
-            {/* Divider */}
             <div className="h-px bg-gradient-to-r from-transparent via-[#00f5e022] to-transparent" />
-
-            {/* Total */}
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between items-center">
               <span className="font-mono font-bold text-[13px] text-white tracking-widest uppercase">Total</span>
-              <span
-                className="font-mono font-bold text-2xl text-[#00f5e0]"
-                style={{ textShadow: "0 0 16px #00f5e044" }}
-              >{fmt(total)}</span>
+              <span className="font-mono font-bold text-2xl text-[#00f5e0]"
+                style={{ textShadow: "0 0 16px #00f5e044" }}>{fmt(total)}</span>
             </div>
           </div>
-
-          {/* Buttons */}
           <div className="flex gap-3">
-            <button
-              onClick={onClose}
+            <button onClick={onClose}
               className="flex-1 h-11 rounded-xl border border-[#00f5e033] text-[#7baaa8]
                 font-mono text-[11px] tracking-widest uppercase
-                hover:border-[#00f5e055] hover:text-[#00f5e0] transition-all duration-200"
-            >Continue</button>
-            <button
-              onClick={onCheckout}
+                hover:border-[#00f5e055] hover:text-[#00f5e0] transition-all duration-200">
+              Continue
+            </button>
+            <button onClick={onCheckout}
               className="flex-1 h-11 rounded-xl bg-[#00f5e0] text-[#080810]
                 font-mono font-bold text-[12px] tracking-widest uppercase
                 hover:bg-[#00ddc9] active:scale-95 transition-all duration-200"
-              style={{ boxShadow: "0 0 20px #00f5e033" }}
-            >Checkout</button>
+              style={{ boxShadow: "0 0 20px #00f5e033" }}>
+              Checkout
+            </button>
           </div>
         </div>
       </div>
@@ -277,10 +244,8 @@ function ProductModal({ product, qty, onQtyChange, onAddToCart, onBuyNow, onClos
       <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0d0d1f] border border-[#00f5e033] rounded-2xl"
         style={{ boxShadow: "0 0 80px #00f5e011, 0 32px 64px #00000088" }}
         onClick={(e) => e.stopPropagation()}>
-
         <button onClick={onClose}
           className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-lg bg-[#080810] border border-[#00f5e033] text-[#00f5e0] hover:bg-[#00f5e011] transition-all duration-200 font-mono text-lg">✕</button>
-
         <div className="relative w-full rounded-t-2xl overflow-hidden bg-[#0a0a14]" style={{ aspectRatio: "16/9" }}>
           <Image src={product.image} alt={product.name} fill className="object-cover" sizes="(max-width: 672px) 100vw, 672px" />
           {product.badge && (
@@ -290,7 +255,6 @@ function ProductModal({ product, qty, onQtyChange, onAddToCart, onBuyNow, onClos
             <span className="absolute top-4 right-12 px-3 py-1 rounded-full bg-[#a855f7] text-white font-mono text-[11px] font-bold">-{discount}%</span>
           )}
         </div>
-
         <div className="p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
@@ -368,7 +332,6 @@ function ProductCard({ product, onOpenModal, onAddToCart }: {
           {product.condition}
         </span>
       </div>
-
       <div className="flex flex-col flex-1 p-4 gap-3">
         <div>
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#00f5e055] mb-0.5">{product.category}</p>
@@ -409,8 +372,9 @@ function ProductCard({ product, onOpenModal, onAddToCart }: {
 // ── Main Section ──────────────────────────────────────────────────────────────
 export default function TechloProductSection() {
   const { query, activeFilter } = useSearch();
+  const { cart, setCart, cartCount } = useCart();
+  const router = useRouter();
 
-  const [cart, setCart]                 = useState<CartItem[]>([]);
   const [modalProduct, setModalProduct] = useState<Product | null>(null);
   const [modalQty, setModalQty]         = useState(1);
   const [basketOpen, setBasketOpen]     = useState(false);
@@ -437,19 +401,20 @@ export default function TechloProductSection() {
       const existing = prev.find((i) => i.id === product.id);
       if (existing) return prev.map((i) => i.id === product.id
         ? { ...i, qty: Math.min(product.inStock, i.qty + qty) } : i);
-      return [...prev, { ...product, qty }];
+      return [...prev, {
+        id: product.id, name: product.name, category: product.category,
+        price: product.price, image: product.image, qty, inStock: product.inStock,
+      }];
     });
     showToast(`${product.name} added to basket`);
-  }, [showToast]);
+  }, [setCart, showToast]);
 
   const updateCartQty = useCallback((id: string, delta: number) => {
     setCart((prev) =>
       prev.map((i) => i.id === id
-        ? { ...i, qty: Math.max(1, Math.min(i.inStock, i.qty + delta)) }
-        : i
-      )
+        ? { ...i, qty: Math.max(1, Math.min(i.inStock, i.qty + delta)) } : i)
     );
-  }, []);
+  }, [setCart]);
 
   const removeFromCart = useCallback((id: string) => {
     setCart((prev) => {
@@ -457,7 +422,7 @@ export default function TechloProductSection() {
       if (next.length === 0) setBasketOpen(false);
       return next;
     });
-  }, []);
+  }, [setCart]);
 
   const handleBuyNow = useCallback((product: Product, qty: number) => {
     addToCart(product, qty);
@@ -465,14 +430,13 @@ export default function TechloProductSection() {
     showToast("Proceeding to checkout…");
   }, [addToCart, showToast]);
 
+  // ── Navigate to checkout page ──
   const handleCheckout = useCallback(() => {
     setBasketOpen(false);
-    showToast("Proceeding to checkout…");
-    // router.push("/checkout")
-  }, [showToast]);
+    router.push("/checkout");
+  }, [router]);
 
   const openModal = (product: Product) => { setModalProduct(product); setModalQty(1); };
-  const cartCount = cart.reduce((acc, i) => acc + i.qty, 0);
 
   return (
     <>
@@ -487,7 +451,6 @@ export default function TechloProductSection() {
       <section id="product-section" className="w-full bg-[#080810] px-4 md:px-10 lg:px-16 py-12">
         <div className="max-w-[1000px] mx-auto">
 
-          {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
               <p className="font-mono text-[11px] tracking-[0.35em] uppercase text-[#00f5e066] mb-1.5">Browse Inventory</p>
@@ -504,7 +467,6 @@ export default function TechloProductSection() {
               )}
             </div>
 
-            {/* ── Clickable basket button ── */}
             {cartCount > 0 && (
               <button
                 onClick={() => setBasketOpen(true)}
@@ -518,18 +480,13 @@ export default function TechloProductSection() {
                   <circle cx="7.5" cy="14" r="1" fill="currentColor"/>
                   <circle cx="12" cy="14" r="1" fill="currentColor"/>
                 </svg>
-                <span className="font-mono text-[11px] tracking-widest uppercase text-[#00f5e066] group-hover:text-[#00f5e0] transition-colors duration-200">
-                  Basket
-                </span>
-                <span
-                  className="w-7 h-7 rounded-full bg-[#00f5e0] text-[#080810] font-mono font-bold text-sm flex items-center justify-center"
-                  style={{ boxShadow: "0 0 12px #00f5e066" }}
-                >{cartCount}</span>
+                <span className="font-mono text-[11px] tracking-widest uppercase text-[#00f5e066] group-hover:text-[#00f5e0] transition-colors duration-200">Basket</span>
+                <span className="w-7 h-7 rounded-full bg-[#00f5e0] text-[#080810] font-mono font-bold text-sm flex items-center justify-center"
+                  style={{ boxShadow: "0 0 12px #00f5e066" }}>{cartCount}</span>
               </button>
             )}
           </div>
 
-          {/* Product Grid */}
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {filtered.map((product, i) => (
@@ -547,18 +504,12 @@ export default function TechloProductSection() {
                 </svg>
               </div>
               <p className="font-mono text-[#00f5e033] text-sm tracking-widest">No results found</p>
-              {query && (
-                <p className="font-mono text-[#ffffff22] text-[11px] tracking-widest">
-                  Try a different search term or category
-                </p>
-              )}
+              {query && <p className="font-mono text-[#ffffff22] text-[11px] tracking-widest">Try a different search term or category</p>}
             </div>
           )}
-
         </div>
       </section>
 
-      {/* ── Product Quick-View Modal ── */}
       {modalProduct && (
         <ProductModal
           product={modalProduct} qty={modalQty}
@@ -569,7 +520,6 @@ export default function TechloProductSection() {
         />
       )}
 
-      {/* ── Basket Modal ── */}
       {basketOpen && cart.length > 0 && (
         <BasketModal
           cart={cart}

@@ -4,6 +4,8 @@ import "./globals.css";
 import TechloHeader from "./components/Header";
 
 import TechloFooter from "./components/Footer";
+import { CartProvider } from "./context/CartContext";
+import { SearchProvider } from "./context/SearchContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +33,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <TechloHeader/>
-        {children}
+        <CartProvider>
+          <SearchProvider>{children}</SearchProvider></CartProvider>
+      
         <TechloFooter/>
       </body>
     </html>
