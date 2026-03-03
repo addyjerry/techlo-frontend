@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface NavItem {
@@ -21,35 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 function TechloLogo() {
   return (
     <Link href="/" className="flex items-center gap-2.5 group no-underline">
-      <div className="relative w-9 h-9 rounded-lg bg-[#0a0a14] border border-[#00f5e033] flex items-center justify-center overflow-hidden group-hover:border-[#00f5e066] transition-colors duration-300">
-        <svg width="22" height="28" viewBox="0 0 22 28" fill="none">
-          <rect
-            x="3" y="1" width="16" height="26" rx="3"
-            stroke="#00f5e0" strokeWidth="1.5" fill="none"
-            style={{ filter: "drop-shadow(0 0 4px #00f5e0)" }}
-          />
-          <path
-            d="M11 7 a4 4 0 0 1 3.5 2"
-            stroke="#00f5e0" strokeWidth="1.3" strokeLinecap="round" fill="none"
-          />
-          <path
-            d="M14.5 9 a4 4 0 0 1 -7 0"
-            stroke="#a855f7" strokeWidth="1.3" strokeLinecap="round" fill="none"
-            style={{ filter: "drop-shadow(0 0 4px #a855f7)" }}
-          />
-          <circle
-            cx="11" cy="23" r="1.5" fill="#00f5e0"
-            style={{ filter: "drop-shadow(0 0 4px #00f5e0)" }}
-          />
-        </svg>
-        <div className="absolute inset-0 bg-gradient-to-br from-[#00f5e00a] to-transparent pointer-events-none" />
-      </div>
-      <span
-        className="text-[#00f5e0] font-mono font-bold text-xl tracking-[0.25em] uppercase transition-all duration-300 group-hover:tracking-[0.3em]"
-        style={{ textShadow: "0 0 12px #00f5e044, 0 0 24px #00f5e022" }}
-      >
-        Techlo
-      </span>
+      <Image src="/icons/logo.png" alt="Techlo Logo" width={132} height={132} className="group-hover:animate-spin-slow" />
     </Link>
   );
 }
