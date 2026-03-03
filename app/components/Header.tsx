@@ -186,7 +186,7 @@ export default function TechloHeader() {
       {/* ── Sticky Header Bar ── */}
       <header
         className={[
-          "sticky top-0 z-50 w-full overflow-hidden transition-all duration-300",
+          "sticky top-0 z-50 w-full overflow-hidden transition-all duration-300 max-w-[1000px] mx-auto",
           scrolled
             ? "bg-[#080810]/95 backdrop-blur-xl border-b border-[#00f5e033] shadow-[0_2px_32px_#00f5e011]"
             : "bg-[#080810]/70 backdrop-blur-md border-b border-transparent",
