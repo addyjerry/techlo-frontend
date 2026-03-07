@@ -1,0 +1,88 @@
+{
+  "name": "Techlo — Ghana's Electronics Marketplace",
+  "short_name": "Techlo",
+  "description": "Ghana's #1 marketplace for second-hand electronics. Find phones, laptops, cameras and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080810",
+  "theme_color": "#00f5e0",
+  "categories": ["shopping", "electronics"],
+  "lang": "en-GH",
+  "icons": [
+    {
+      "src": "/icons/pwa-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/pwa-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Techlo Home"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Gadgets",
+      "short_name": "Browse",
+      "description": "Browse all available electronics",
+      "url": "/#product-section",
+      "icons": [{ "src": "/icons/pwa-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Checkout",
+      "short_name": "Checkout",
+      "description": "Complete your order",
+      "url": "/checkout",
+      "icons": [{ "src": "/icons/pwa-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}

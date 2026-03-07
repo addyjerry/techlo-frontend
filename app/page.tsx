@@ -2,6 +2,7 @@ import Image from "next/image";
 import TechloHero from "./components/HeroSection";
 import TechloProductSection from "./components/ProductSection";
 import { SearchProvider } from "./context/SearchContext";
+import PWAInstallPrompt from "./components/Pwainstallprompt";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <TechloHero/>
       <TechloProductSection/>
       </SearchProvider>
+      <PWAInstallPrompt/>
     </div>
   );
 }
