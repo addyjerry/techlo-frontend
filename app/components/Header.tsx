@@ -12,7 +12,7 @@ interface NavItem {
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const NAV_ITEMS: NavItem[] = [
-  { label: "Browse", href: "/browse" },
+  { label: "Browse", href: "/browser" },
   { label: "Sell", href: "/sell" },
   { label: "Deals", href: "/deals" },
   { label: "About", href: "/about" },
