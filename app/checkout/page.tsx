@@ -67,6 +67,8 @@ function NetworkBadge({ mobile }: { mobile: string }) {
     ),
   };
 
+
+  
   return (
     <span
       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] tracking-widest font-bold transition-all duration-300"
@@ -373,11 +375,45 @@ export default function CheckoutPage() {
       return;
     }
 
+const createOrder = async () => {
+  try {
+
+    const response = await fetch(
+      "https://techlo-backend.onrender.com/api/orders",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: cart.map((item) => ({
+            name: item.name,
+            price: item.price,
+            quantity: item.qty,
+          })),
+          customerName: form.name,
+          phone: form.mobile,
+          location: `${form.location}, ${form.region}`,
+          paymentMethod: form.payment === "delivery" ? "cod" : "paystack",
+          email: `${form.mobile}@techlo.gh`,
+        }),
+      }
+    );
+
+    return await response.json();
+
+  } catch (error) {
+    console.error("Order error:", error);
+    throw error;
+  }
+};
+
     // Payment on delivery
-    await new Promise((r) => setTimeout(r, 1000));
-    setSubmitting(false);
-    setSubmitted(true);
-    clearCart();
+const order = await createOrder();
+
+setSubmitting(false);
+setSubmitted(true);
+clearCart();
   };
 
   // ── Success screen ────────────────────────────────────────────────────────
