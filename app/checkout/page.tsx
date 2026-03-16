@@ -349,33 +349,8 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-
-    setSubmitting(true);
-
-    if (isMoMo) {
-      setSubmitting(false);
-      await initiatePaystackMoMo();
-      return;
-    }
-
-    if (isPaystack && !isMoMo) {
-      // Non-MoMo Paystack: use Paystack inline JS for card payments
-      setSubmitting(false);
-      // In production: load Paystack inline popup here
-      // For now, simulate card flow
-      setSubmitting(true);
-      await new Promise((r) => setTimeout(r, 1400));
-      setSubmitting(false);
-      setSubmitted(true);
-      clearCart();
-      return;
-    }
-
-const createOrder = async () => {
+  // ── Form submission handler ─────────────────────────────────────────────────
+  const createOrder = async () => {
   try {
 
     const response = await fetch(
@@ -400,21 +375,58 @@ const createOrder = async () => {
       }
     );
 
-    return await response.json();
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Order failed");
+    }
+
+    return data;
 
   } catch (error) {
-    console.error("Order error:", error);
+    console.error("Order creation error:", error);
     throw error;
   }
 };
 
-    // Payment on delivery
-const order = await createOrder();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-setSubmitting(false);
-setSubmitted(true);
-clearCart();
-  };
+  const errs = validate();
+  if (Object.keys(errs).length > 0) {
+    setErrors(errs);
+    return;
+  }
+
+  setSubmitting(true);
+
+  try {
+
+    const order = await createOrder();
+
+    // If backend returned Paystack payment URL
+    if (order.paymentUrl) {
+
+      window.location.href = order.paymentUrl;
+      return;
+
+    }
+
+    // Cash on delivery
+    setSubmitted(true);
+    clearCart();
+
+  } catch (error) {
+
+    console.error(error);
+    alert("Failed to place order");
+
+  } finally {
+
+    setSubmitting(false);
+
+  }
+};
 
   // ── Success screen ────────────────────────────────────────────────────────
   if (submitted) {
