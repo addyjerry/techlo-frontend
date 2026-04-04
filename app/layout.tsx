@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     locale: "en_GH",
     url: "https://techlo.gh",
     siteName: "Techlo",
-    title: "Techlo — Ghana's #1 Second-Hand Electronics Marketplace",
+    title: "Techlo ",
     description: "Find phones, laptops, cameras and more at the best prices across Ghana.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Techlo Marketplace" }],
   },
@@ -90,10 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        {/*
-          Extra tags Next.js metadata doesn't cover natively.
-          These are important for a polished PWA experience.
-        */}
+       
 
         {/* Prevents iOS from auto-detecting phone numbers and styling them as links */}
         <meta name="format-detection" content="telephone=no" />
@@ -113,7 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Both providers wrap the entire app so any page can access
           cart state and search state without prop drilling.
         */}
-        <TechloHeader/>
+        {/* <TechloHeader/> */}
         <CartProvider>
           <SearchProvider>
             {children}

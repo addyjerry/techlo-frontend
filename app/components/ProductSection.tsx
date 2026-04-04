@@ -288,11 +288,11 @@ function ProductModal({ product, qty, onQtyChange, onAddToCart, onBuyNow, onClos
               className="flex-1 h-11 px-5 rounded-xl border border-[#00f5e044] text-[#00f5e0] font-mono text-[12px] tracking-widest uppercase bg-[#00f5e011] hover:bg-[#00f5e022] hover:border-[#00f5e088] transition-all duration-200 active:scale-95">
               Add to Basket
             </button>
-            <button onClick={onBuyNow}
+            {/* <button onClick={onBuyNow}
               className="flex-1 h-11 px-5 rounded-xl bg-[#00f5e0] text-[#080810] font-mono font-bold text-[12px] tracking-widest uppercase hover:bg-[#00ddc9] transition-all duration-200 active:scale-95"
               style={{ boxShadow: "0 0 20px #00f5e033" }}>
               Buy Now
-            </button>
+            </button> */}
           </div>
           <p className="mt-3 font-mono text-[11px] text-[#ffffff33] text-center">
             {product.inStock} unit{product.inStock !== 1 ? "s" : ""} in stock
